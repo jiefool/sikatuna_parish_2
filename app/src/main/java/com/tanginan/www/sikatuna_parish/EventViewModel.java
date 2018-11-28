@@ -43,6 +43,10 @@ public class EventViewModel extends ViewModel {
         return eventList;
     }
 
+    public List<Event> getData(){
+        return elist;
+    }
+
     public void loadEvents() {
         JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
             @Override
@@ -53,6 +57,9 @@ public class EventViewModel extends ViewModel {
                     for(int i=0;i<events.length();i++){
                         JSONObject event = events.getJSONObject(i);
                         Event nEvent = new Event(event);
+                        System.out.println("Event:"+nEvent.getId());
+                        System.out.println("Event:"+nEvent.getName());
+                        System.out.println("Event:"+nEvent.getUserId());
                         elist.add(nEvent);
                     }
                 } catch (JSONException e) {
