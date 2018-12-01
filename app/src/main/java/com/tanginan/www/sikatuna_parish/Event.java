@@ -15,6 +15,7 @@ public class Event {
     private Date timeEnd;
     private Date alarm;
     private String details;
+    private String status;
 
     public Event(JSONObject event) throws JSONException, ParseException {
         this.setId(event.getInt("id"));
@@ -24,6 +25,11 @@ public class Event {
         this.setTimeEnd(formatDate(event.getString("time_end")));
         this.setAlarm(formatDate(event.getString("alarm")));
         this.setDetails(event.getString("details"));
+        if(event.getString("status").isEmpty()){
+            this.setStatus("Pending");
+        }else{
+            this.setStatus(event.getString("status"));
+        }
     }
 
     public Date formatDate(String date) throws ParseException {
@@ -59,16 +65,18 @@ public class Event {
         this.name = name;
     }
 
-    public Date getTimeStart() {
-        return timeStart;
+    public String getTimeStart() {
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm aaa");
+        return formatter.format(timeStart);
     }
 
     public void setTimeStart(Date timeStart) {
         this.timeStart = timeStart;
     }
 
-    public Date getTimeEnd() {
-        return timeEnd;
+    public String getTimeEnd() {
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm aaa");
+        return formatter.format(timeEnd);
     }
 
     public void setTimeEnd(Date timeEnd) {
@@ -87,7 +95,30 @@ public class Event {
         return details;
     }
 
+    public String getDateMonth(){
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM");
+        String dateMonth = formatter.format(timeStart);
+        return dateMonth;
+    }
+
     public void setDetails(String details) {
         this.details = details;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDateDay(){
+        SimpleDateFormat formatter = new SimpleDateFormat("d");
+        String dateMonth = formatter.format(timeStart);
+        return dateMonth;
+    }
+
+
+
 }

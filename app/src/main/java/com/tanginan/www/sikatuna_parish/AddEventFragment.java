@@ -1,5 +1,7 @@
 package com.tanginan.www.sikatuna_parish;
 
+import android.app.AlertDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,6 +9,20 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 
 /**
@@ -22,10 +38,16 @@ public class AddEventFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    ApiUtils apiUtils;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    EditText etName;
+    EditText etTimeStart;
+    EditText etTimeEnd;
+    EditText etAlarm;
+    EditText etDetails;
+    Spinner priestSelect;
+    List<Priest> priests;
+    Long time;
 
     private OnFragmentInteractionListener mListener;
 
@@ -54,17 +76,55 @@ public class AddEventFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_event, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_add_event, container, false);
+
+        EventViewModel model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
+        priests = model.getPriestData();
+
+        etName = view.findViewById(R.id.name);
+        etTimeStart = view.findViewById(R.id.start_datetime);
+        etTimeStart.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    showDateTimePicker(etTimeStart);
+                }
+            }
+        });
+
+
+        etTimeEnd = view.findViewById(R.id.end_datetime);
+        etTimeEnd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    showDateTimePicker(etTimeEnd);
+                }
+            }
+        });
+
+        etAlarm = view.findViewById(R.id.alarm);
+        etDetails = view.findViewById(R.id.details);
+        apiUtils = new ApiUtils(getContext());
+        priestSelect = view.findViewById(R.id.priestSpinner);
+
+        ArrayList<String> priestNames = new ArrayList<>();
+        for(int i=0;i<priests.size();i++){
+            priestNames.add(priests.get(i).getName());
+        }
+        ArrayAdapter adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item, priestNames);
+        priestSelect.setAdapter(adapter);
+
+
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -104,5 +164,34 @@ public class AddEventFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void showDateTimePicker(EditText editText){
+        final View dialogView = View.inflate(getActivity(), R.layout.date_time_picker, null);
+        final AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+
+        Button setBtn = dialogView.findViewById(R.id.date_time_set);
+        setBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DatePicker datePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
+                TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
+
+                Calendar calendar = new GregorianCalendar(datePicker.getYear(),
+                        datePicker.getMonth(),
+                        datePicker.getDayOfMonth(),
+                        timePicker.getCurrentHour(),
+                        timePicker.getCurrentMinute());
+
+                time = calendar.getTimeInMillis();
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                editText.setText(formatter.format(time));
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.setView(dialogView);
+        alertDialog.show();
+
     }
 }

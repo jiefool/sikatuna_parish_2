@@ -21,8 +21,15 @@ public class EventViewModel extends ViewModel {
 
     ApiUtils apiUtils;
     ArrayList<Event> elist =  new ArrayList<Event>();
+    ArrayList<Priest> ulist =  new ArrayList<Priest>();
 
-    private LiveData<List<Event>> eventList;
+    public void loadData(Context context){
+        apiUtils = new ApiUtils(context);
+        loadEvents();
+        loadPriests();
+    }
+
+    public LiveData<List<Event>> eventList;
 
     private final MutableLiveData<Event> selectedEvent = new MutableLiveData<Event>();
 
@@ -34,17 +41,12 @@ public class EventViewModel extends ViewModel {
         selectedEvent.setValue(event);
     }
 
-    public LiveData<List<Event>> getEventList(Context context) {
-        apiUtils = new ApiUtils(context);
-        if (eventList == null) {
-            eventList = new MutableLiveData<List<Event>>();
-            loadEvents();
-        }
-        return eventList;
+    public List<Event> getEventData(){
+        return elist;
     }
 
-    public List<Event> getData(){
-        return elist;
+    public List<Priest> getPriestData(){
+        return ulist;
     }
 
     public void loadEvents() {
@@ -54,12 +56,11 @@ public class EventViewModel extends ViewModel {
                 System.out.println("EVENTS:"+response);
                 try {
                     JSONArray events = response.getJSONArray("events");
+                    elist = new ArrayList<Event>();
                     for(int i=0;i<events.length();i++){
                         JSONObject event = events.getJSONObject(i);
                         Event nEvent = new Event(event);
-                        System.out.println("Event:"+nEvent.getId());
-                        System.out.println("Event:"+nEvent.getName());
-                        System.out.println("Event:"+nEvent.getUserId());
+                        System.out.println("Event:"+nEvent.getStatus());
                         elist.add(nEvent);
                     }
                 } catch (JSONException e) {
@@ -68,7 +69,6 @@ public class EventViewModel extends ViewModel {
                     e.printStackTrace();
                 }
 
-                System.out.println("event list:"+elist);
             }
 
             @Override
@@ -78,5 +78,30 @@ public class EventViewModel extends ViewModel {
             }
         };
         apiUtils.getEvents(jhtrh);
+    }
+
+    public void loadPriests(){
+        JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                try {
+                    ulist = new ArrayList<Priest>();
+                    for(int i=0;i<response.length();i++){
+                        JSONObject priest = response.getJSONObject(i);
+                        Priest nPriest = new Priest(priest);
+                        System.out.println("Priest:"+nPriest.getName());
+                        ulist.add(nPriest);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+        };
+        apiUtils.getPriestUsers(jhtrh);
     }
 }

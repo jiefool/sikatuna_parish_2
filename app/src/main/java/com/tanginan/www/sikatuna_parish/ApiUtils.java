@@ -45,6 +45,7 @@ public class ApiUtils {
     public void getPriestUsers(JsonHttpResponseHandler jhrh){
         String url = "users/priest";
         RequestParams params = new RequestParams();
+        params.add("type", "priest");
         HttpUtils.get(url, params, jhrh, accessToken);
     }
 
@@ -103,6 +104,13 @@ public class ApiUtils {
         String url = "groups";
         RequestParams params = new RequestParams();
         HttpUtils.get(url, params,jhrh, accessToken);
+    }
+
+    public void eventStatusUpdate(Integer eventId, String status, JsonHttpResponseHandler jhrh){
+        String url = "events/"+eventId+"/status-update";
+        RequestParams params = new RequestParams();
+        params.add("status", status);
+        HttpUtils.post(url, params,jhrh, accessToken);
     }
 
 

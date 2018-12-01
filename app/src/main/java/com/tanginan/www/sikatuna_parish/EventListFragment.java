@@ -10,10 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioButton;
 
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent;
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent.DummyItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,6 +31,11 @@ public class EventListFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    List<Event> elist;
+    List<Event> eventList;
+    MyEventListRecyclerViewAdapter adapter;
+    EventViewModel model;
+    RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -61,19 +68,37 @@ public class EventListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_eventlist_list, container, false);
 
-        EventViewModel model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
+        model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
+        elist = model.getEventData();
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        Context context = view.getContext();
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+        adapter = new MyEventListRecyclerViewAdapter(elist, mListener, getContext(), model);
+        recyclerView.setAdapter(adapter);
+
+        RadioButton confirmRb = view.findViewById(R.id.confirm_rb);
+        RadioButton pendingRb = view.findViewById(R.id.pending_rb);
+        RadioButton rejectedRb = view.findViewById(R.id.rejected_rb);
+        RadioButton allRb = view.findViewById(R.id.all_rb);
+
+        confirmRb.setOnClickListener(new GenericOnClickListener(confirmRb));
+        pendingRb.setOnClickListener(new GenericOnClickListener(pendingRb));
+        rejectedRb.setOnClickListener(new GenericOnClickListener(rejectedRb));
+        allRb.setOnClickListener(new GenericOnClickListener(allRb));
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new MyEventListRecyclerViewAdapter(model.getData(), mListener));
-        }
+//        if (view instanceof RecyclerView) {
+//            Context context = view.getContext();
+//            RecyclerView recyclerView = (RecyclerView) view;
+//            if (mColumnCount <= 1) {
+//                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+//            } else {
+//                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+//            }
+//            recyclerView.setAdapter(new MyEventListRecyclerViewAdapter(model.getData(), mListener));
+//        }
         return view;
     }
 
@@ -109,5 +134,34 @@ public class EventListFragment extends Fragment {
         // TODO: Update argument type and name
         void onListFragmentInteraction(Event item);
 
+    }
+
+    private class GenericOnClickListener implements View.OnClickListener {
+        View view;
+        public GenericOnClickListener(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch(view.getId()){
+                case R.id.confirm_rb:
+                    adapter.getFilter().filter("confirmed");
+                    break;
+                case R.id.pending_rb:
+                    adapter.getFilter().filter("pending");
+                    break;
+                case R.id.rejected_rb:
+                    adapter.getFilter().filter("rejected");
+                    break;
+                case R.id.all_rb:
+                    adapter.getFilter().filter("");
+                    break;
+            }
+
+            adapter.notifyDataSetChanged();
+
+
+        }
     }
 }

@@ -22,4 +22,14 @@
     <string name="events">Events</string>
     <string name="groups">Groups</string>
     <string name="add_event">Add Event</string>
+    <string name="nine">9</string>
+    <string name="nov">Nov</string>
+    <string name="confirm">Confirm</string>
+    <string name="pending">Pending</string>
+    <string name="rejected">Rejected</string>
+    <string name="all">All</string>
+    <string name="name">Name</string>
+    <string name="confirmed">Confirmed</string>
+    <string name="create_event">Create Event</string>
+    <string name="clear">Clear</string>
 </resources>

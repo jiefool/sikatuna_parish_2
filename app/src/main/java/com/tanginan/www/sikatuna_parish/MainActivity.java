@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     public FragmentManager fragmentManager;
     Integer fragContainer;
     private TextView mTextMessage;
+    BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         setContentView(R.layout.activity_main);
 
         EventViewModel model = ViewModelProviders.of(this).get(EventViewModel.class);
-        model.getEventList(this);
+        model.loadData(this);
 
         fragmentManager = getSupportFragmentManager();
         fragContainer =  findViewById(R.id.fragContainer).getId();
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
 
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.home);
 
@@ -103,4 +104,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     public void onListFragmentInteraction(Event item) {
 
     }
+
+    public void refreshEventList(){
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setSelectedItemId(R.id.events);
+    }
+
 }
