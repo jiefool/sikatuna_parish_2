@@ -1,9 +1,12 @@
 package com.tanginan.www.sikatuna_parish;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,16 +16,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 
 /**
@@ -47,7 +62,14 @@ public class AddEventFragment extends Fragment {
     EditText etDetails;
     Spinner priestSelect;
     List<Priest> priests;
+    ArrayAdapter adapter;
+    PriestList priestList;
     Long time;
+    Button createEvent;
+    ProgressBar createEventDialog;
+    LinearLayout layoutContainer;
+    EventViewModel model;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -85,7 +107,7 @@ public class AddEventFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_add_event, container, false);
 
-        EventViewModel model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
+        model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
         priests = model.getPriestData();
 
         etName = view.findViewById(R.id.name);
@@ -114,14 +136,28 @@ public class AddEventFragment extends Fragment {
         etDetails = view.findViewById(R.id.details);
         apiUtils = new ApiUtils(getContext());
         priestSelect = view.findViewById(R.id.priestSpinner);
+        priestList = new PriestList(priests);
 
-        ArrayList<String> priestNames = new ArrayList<>();
-        for(int i=0;i<priests.size();i++){
-            priestNames.add(priests.get(i).getName());
-        }
-        ArrayAdapter adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item, priestNames);
+        ArrayList<String> priestNames = priestList.getPriestNames();
+        adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item, priestNames);
         priestSelect.setAdapter(adapter);
 
+        createEvent = view.findViewById(R.id.create_event_btn);
+        createEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    validateAndCreateEvent();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        createEventDialog = view.findViewById(R.id.create_event_progress);
+        layoutContainer = view.findViewById(R.id.create_event_container);
 
 
         return view;
@@ -176,6 +212,7 @@ public class AddEventFragment extends Fragment {
             public void onClick(View view) {
 
                 DatePicker datePicker = (DatePicker) dialogView.findViewById(R.id.date_picker);
+                datePicker.setMinDate(System.currentTimeMillis() - 1000);
                 TimePicker timePicker = (TimePicker) dialogView.findViewById(R.id.time_picker);
 
                 Calendar calendar = new GregorianCalendar(datePicker.getYear(),
@@ -193,5 +230,107 @@ public class AddEventFragment extends Fragment {
         alertDialog.setView(dialogView);
         alertDialog.show();
 
+    }
+
+    public void validateAndCreateEvent() throws JSONException, ParseException {
+        String eventName = etName.getText().toString();
+        Boolean valid = true;
+        if(eventName.length()<=0){
+            etName.requestFocus();
+            etName.setError("Event name is required.");
+            valid = false;
+
+        }
+
+        String timeStart = etTimeStart.getText().toString();
+        if(timeStart.length()<=0){
+            etTimeStart.setError("This field is required.");
+        }
+        String timeEnd = etTimeEnd.getText().toString();
+        if(timeEnd.length()<=0){
+            etTimeEnd.setError("This field is required.");
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Long timeStartInt = formatter.parse(timeStart).getTime();
+        Long timeEndInt = formatter.parse(timeEnd).getTime();
+
+        if (timeEndInt < timeStartInt ){
+            etTimeEnd.requestFocus();
+            etTimeEnd.setError("End time should be later than start time.");
+            valid = false;
+        }
+
+        String alarm = etAlarm.getText().toString();
+
+        String details = etAlarm.getText().toString();
+
+
+
+        Priest priest = priestList.getPriestByName(priestSelect.getSelectedItem().toString());
+
+        if(valid){
+            showProgress(true);
+            JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    System.out.println(response);
+                    showProgress(false);
+                    model.loadData(getActivity());
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+                }
+            };
+            RequestParams params = new RequestParams();
+            params.add("name", eventName);
+            params.add("time_start", timeStart);
+            params.add("time_end", timeEnd);
+            params.add("alarm", alarm);
+            params.add("details", details);
+            params.add("user_id", priest.getId().toString());
+            params.add("is_confirmed", "false");
+            params.add("status", "Pending");
+
+            apiUtils.createEvent(params, jhrh);
+
+        }
+    }
+
+
+
+
+    public void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getActivity().getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            layoutContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+            layoutContainer.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    layoutContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            createEventDialog.setVisibility(show ? View.VISIBLE : View.GONE);
+            createEventDialog.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    createEventDialog.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            createEventDialog.setVisibility(show ? View.VISIBLE : View.GONE);
+            layoutContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 }

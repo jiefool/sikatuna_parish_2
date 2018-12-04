@@ -88,7 +88,8 @@ public class EventViewModel extends ViewModel {
                     ulist = new ArrayList<Priest>();
                     for(int i=0;i<response.length();i++){
                         JSONObject priest = response.getJSONObject(i);
-                        Priest nPriest = new Priest(priest);
+                        Priest nPriest = new Priest();
+                        nPriest.setPriest(priest);
                         System.out.println("Priest:"+nPriest.getName());
                         ulist.add(nPriest);
                     }

@@ -8,7 +8,7 @@ public class Priest {
     private String name;
     private String photo;
 
-    public Priest(JSONObject priest) throws JSONException {
+    public void setPriest(JSONObject priest) throws JSONException {
         setId(priest.getInt("id"));
         setName(priest.getString("name"));
         setPhoto(priest.getString("photo"));

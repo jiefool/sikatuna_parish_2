@@ -75,6 +75,8 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
 
         if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("confirmed")){
             holder.status.setTextColor(Color.GREEN);
+        }else{
+            holder.status.setTextColor(Color.RED);
         }
 
         holder.confirmBtn.setOnClickListener(new View.OnClickListener() {
