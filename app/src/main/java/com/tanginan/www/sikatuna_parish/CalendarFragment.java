@@ -1,7 +1,12 @@
 package com.tanginan.www.sikatuna_parish;
 
+import android.arch.lifecycle.ViewModelProviders;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +15,9 @@ import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 import com.applandeo.materialcalendarview.listeners.OnDayClickListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 
 public class CalendarFragment extends Fragment {
@@ -18,6 +25,10 @@ public class CalendarFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    EventViewModel model;
+    List<EventDay> events;
+
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -26,20 +37,9 @@ public class CalendarFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CalendarFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CalendarFragment newInstance(String param1, String param2) {
+    public static CalendarFragment newInstance(MainActivity mainActivity) {
         CalendarFragment fragment = new CalendarFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,8 +48,21 @@ public class CalendarFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+//            fragContainer = getArguments().getInt("fragContainer");
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+
+
+        model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
+        List<Event> parishEvents = model.getEventData();
+
+        events = new ArrayList<>();
+
+        for(int i=0;i<parishEvents.size();i++){
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(parishEvents.get(i).getTimeStartDate());
+            EventDay event = new EventDay(calendar, R.drawable.ic_event_note_black_24dp);
+            events.add(event);
         }
 
 
@@ -63,19 +76,16 @@ public class CalendarFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_calendar, container, false);
         CalendarView calendarView = v.findViewById(R.id.calendarView);
+        calendarView.setEvents(events);
         Calendar min = Calendar.getInstance();
+        min.add(Calendar.DATE, -1);
         calendarView.setMinimumDate(min);
 
-
-//        listItemSelector.setOnClickListener(article -> {
-//            model.setSelectedArticle(event);
-//        });
 
         calendarView.setOnDayClickListener(new OnDayClickListener() {
             @Override
             public void onDayClick(EventDay eventDay) {
-                Calendar clickedDayCalendar = eventDay.getCalendar();
-                System.out.println(clickedDayCalendar);
+                ((MainActivity)getActivity()).fireAddEventFragment();
             }
         });
 

@@ -10,6 +10,7 @@
         android:id="@+id/calendarView"
         app:disabledDaysLabelsColor="@android:color/black"
         app:daysLabelsColor="@android:color/holo_green_dark"
+        app:todayLabelColor="@android:color/holo_red_dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

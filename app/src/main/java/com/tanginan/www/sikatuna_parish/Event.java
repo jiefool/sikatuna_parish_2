@@ -65,6 +65,10 @@ public class Event {
         this.name = name;
     }
 
+    public Date getTimeStartDate() {
+        return timeStart;
+    }
+
     public String getTimeStart() {
         SimpleDateFormat formatter = new SimpleDateFormat("hh:mm aaa");
         return formatter.format(timeStart);

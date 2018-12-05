@@ -9,17 +9,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent;
 
-import java.security.acl.Group;
 
 public class MainActivity extends AppCompatActivity implements EventListFragment.OnListFragmentInteractionListener, GroupListFragment.OnListFragmentInteractionListener,  AddEventFragment.OnFragmentInteractionListener {
 
     public FragmentManager fragmentManager;
     Integer fragContainer;
-    private TextView mTextMessage;
     BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -56,10 +53,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     return true;
                 case R.id.groups:
 //                  mTextMessage.setText(R.string.title_notifications);
-                    GroupListFragment groupListFragment = new GroupListFragment();
-                    fragmentTransaction.replace(fragContainer, groupListFragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+//                    GroupListFragment groupListFragment = new GroupListFragment();
+//                    fragmentTransaction.replace(fragContainer, groupListFragment);
+//                    fragmentTransaction.addToBackStack(null);
+//                    fragmentTransaction.commit();
+
+                    fireAddEventFragment();
                     return true;
             }
 
@@ -79,13 +78,11 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         fragmentManager = getSupportFragmentManager();
         fragContainer =  findViewById(R.id.fragContainer).getId();
 
-//        mTextMessage = (TextView) findViewById(R.id.message);
-
-
-
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         navigation.setSelectedItemId(R.id.home);
+
 
 
     }
@@ -105,9 +102,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     }
 
-    public void refreshEventList(){
-        navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setSelectedItemId(R.id.events);
+    public void fireAddEventFragment(){
+        navigation.setSelectedItemId(R.id.add_event);
     }
 
 }
