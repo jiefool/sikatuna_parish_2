@@ -32,4 +32,10 @@
     <string name="confirmed">Confirmed</string>
     <string name="create_event">Create Event</string>
     <string name="clear">Clear</string>
+    <string name="event_name">Event Name</string>
+    <string name="stop_alarm">Stop Alarm</string>
+    <string name="group_name">Group Name</string>
+    <string name="group_leader_name">Group Leader Name</string>
+    <string name="group_contact_number">Group Contact Number</string>
+    <string name="create_group">Create Group</string>
 </resources>

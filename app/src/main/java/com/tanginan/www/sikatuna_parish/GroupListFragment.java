@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -51,6 +52,7 @@ public class GroupListFragment extends Fragment {
     RecyclerView recyclerView;
     MyGroupListRecyclerViewAdapter adapter;
     ArrayList<Group> arGroup = new ArrayList<>();
+    Button addNewGroupBtn;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -89,6 +91,14 @@ public class GroupListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.group_rv);
         Context context = view.getContext();
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        addNewGroupBtn = view.findViewById(R.id.add_group_btn);
+
+        addNewGroupBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)getActivity()).addNewGroup();
+            }
+        });
         loadGroups();
 
 

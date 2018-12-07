@@ -2,7 +2,10 @@ package com.tanginan.www.sikatuna_parish;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +32,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -161,6 +165,43 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             }
         };
         apiUtils.getPriestUsers(jhtrh);
+    }
+
+    public void setEventAlarms(){
+        List<Event> elist = model.getEventData();
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        ArrayList<PendingIntent> intentArray = new ArrayList<PendingIntent>();
+
+        for(int i=0;i<elist.size();i++){
+            if (System.currentTimeMillis() < elist.get(i).getAlarm().getTime()) {
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(elist.get(i).getAlarm());
+
+                System.out.println("ALARM IN:");
+                System.out.println( elist.get(i).getAlarm());
+                Intent intent = new Intent(this, AlarmReceiver.class);
+                intent.putExtra("event", elist.get(i).toString());
+                PendingIntent pi = PendingIntent.getBroadcast(this, elist.get(i).getId(), intent, elist.get(i).getId());
+                am.cancel(pi);
+                am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
+                intentArray.add(pi);
+            }
+        }
+
+
+    }
+
+    public void addNewGroup(){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        AddNewGroupFragment addNewGroupFragment = new AddNewGroupFragment();
+        fragmentTransaction.replace(fragContainer, addNewGroupFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    public void fireListGroupFragment(){
+        navigation.setSelectedItemId(R.id.groups);
     }
 
 }

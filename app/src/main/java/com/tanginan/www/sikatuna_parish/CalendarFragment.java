@@ -2,8 +2,11 @@ package com.tanginan.www.sikatuna_parish;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +43,8 @@ import java.util.Date;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+
+import static android.content.Context.ALARM_SERVICE;
 
 
 public class CalendarFragment extends Fragment {
@@ -156,6 +161,7 @@ public class CalendarFragment extends Fragment {
                         model.setElist(parishEvents);
                         loadEventsToCalendar();
                         displayEvents(Calendar.getInstance());
+                        ((MainActivity)getActivity()).setEventAlarms();
                         showProgress(false);
                     }
                 } catch (JSONException e) {
@@ -269,6 +275,10 @@ public class CalendarFragment extends Fragment {
             listContainer.setVisibility(View.GONE);
         }
     }
+
+
+
+
 
 
 
