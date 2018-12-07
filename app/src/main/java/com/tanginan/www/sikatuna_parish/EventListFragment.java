@@ -1,7 +1,10 @@
 package com.tanginan.www.sikatuna_parish;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,13 +13,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent;
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent.DummyItem;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 /**
  * A fragment representing a list of Items.
@@ -31,11 +44,14 @@ public class EventListFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
-    List<Event> elist;
+    ArrayList<Event> elist;
     List<Event> eventList;
     MyEventListRecyclerViewAdapter adapter;
     EventViewModel model;
     RecyclerView recyclerView;
+    ProgressBar loadProgress;
+    LinearLayout eventListContainer;
+    ApiUtils apiUtils;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -68,15 +84,18 @@ public class EventListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_eventlist_list, container, false);
 
-        model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
-        elist = model.getEventData();
+        model = ViewModelProviders.of((MainActivity)getActivity()).get(EventViewModel.class);
+        loadProgress = view.findViewById(R.id.loading_progress);
+        eventListContainer = view.findViewById(R.id.event_list_container);
+        apiUtils = new ApiUtils(getActivity());
+        loadEvents();
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
         Context context = view.getContext();
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        adapter = new MyEventListRecyclerViewAdapter(elist, mListener, getContext(), model);
-        recyclerView.setAdapter(adapter);
+
 
         RadioButton confirmRb = view.findViewById(R.id.confirm_rb);
         RadioButton pendingRb = view.findViewById(R.id.pending_rb);
@@ -162,6 +181,76 @@ public class EventListFragment extends Fragment {
             adapter.notifyDataSetChanged();
 
 
+        }
+    }
+
+    public void loadEvents() {
+        showProgress(true);
+        JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                System.out.println("EVENTS:"+response);
+                try {
+                    JSONArray events = response.getJSONArray("events");
+                    elist = new ArrayList<Event>();
+                    for(int i=0;i<events.length();i++){
+                        JSONObject event = events.getJSONObject(i);
+                        Event nEvent = new Event(event);
+                        System.out.println("Event:"+nEvent.getStatus());
+                        elist.add(nEvent);
+                        model.setElist(elist);
+
+                        adapter = new MyEventListRecyclerViewAdapter(elist, mListener, getContext());
+                        recyclerView.setAdapter(adapter);
+
+                        showProgress(false);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+
+            }
+        };
+        apiUtils.getEvents(jhtrh);
+    }
+
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            eventListContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+            eventListContainer.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    eventListContainer.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            loadProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+            loadProgress.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    loadProgress.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            eventListContainer.setVisibility(show ? View.VISIBLE : View.GONE);
+            loadProgress.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 }

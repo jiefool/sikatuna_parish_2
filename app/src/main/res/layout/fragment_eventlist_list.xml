@@ -12,46 +12,62 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RadioGroup
-            android:padding="10dp"
-            android:orientation="horizontal"
-            android:layout_gravity="center"
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"
+            />
 
-            <RadioButton
-                android:id="@+id/confirm_rb"
-                android:text="@string/confirmed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <RadioButton
-                android:id="@+id/pending_rb"
-                android:text="@string/pending"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <RadioButton
-                android:id="@+id/rejected_rb"
-                android:text="@string/rejected"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-            <RadioButton
-                android:id="@+id/all_rb"
-                android:text="@string/all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </RadioGroup>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/list"
-            android:name="com.tanginan.www.sikatuna_parish.EventListFragment"
-            android:layout_marginLeft="16dp"
-            android:layout_height="match_parent"
+        <LinearLayout
+            android:id="@+id/event_list_container"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_marginRight="16dp"
-            app:layoutManager="LinearLayoutManager"
-            tools:context=".EventListFragment"
-            tools:listitem="@layout/fragment_eventlist"/>
+            android:layout_height="match_parent">
+            <RadioGroup
+                android:padding="10dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/confirm_rb"
+                    android:text="@string/confirmed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/pending_rb"
+                    android:text="@string/pending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/rejected_rb"
+                    android:text="@string/rejected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/all_rb"
+                    android:text="@string/all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </RadioGroup>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/list"
+                android:name="com.tanginan.www.sikatuna_parish.EventListFragment"
+                android:layout_marginLeft="16dp"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                android:layout_marginRight="16dp"
+                app:layoutManager="LinearLayoutManager"
+                tools:context=".EventListFragment"
+                tools:listitem="@layout/fragment_eventlist"/>
+        </LinearLayout>
     </LinearLayout>
 
 

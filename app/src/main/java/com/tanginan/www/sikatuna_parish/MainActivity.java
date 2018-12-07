@@ -1,7 +1,10 @@
 package com.tanginan.www.sikatuna_parish;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.arch.lifecycle.ViewModelProviders;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -9,15 +12,38 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
+
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import cz.msebera.android.httpclient.Header;
 
 
 public class MainActivity extends AppCompatActivity implements EventListFragment.OnListFragmentInteractionListener, GroupListFragment.OnListFragmentInteractionListener,  AddEventFragment.OnFragmentInteractionListener {
 
     public FragmentManager fragmentManager;
     Integer fragContainer;
+    View fragContainerView;
     BottomNavigationView navigation;
+    ArrayList<Priest> ulist =  new ArrayList<Priest>();
+    ArrayList<Event> elist =  new ArrayList<Event>();
+    EventViewModel model;
+    ApiUtils apiUtils;
+    Date clickedDate = Calendar.getInstance().getTime();
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -38,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 case R.id.add_event:
 //                    mTextMessage.setText(R.string.title_home);
 
-                    AddEventFragment addEventFragment = new AddEventFragment();
+                    AddEventFragment addEventFragment = AddEventFragment.newInstance(clickedDate);
                     fragmentTransaction.replace(fragContainer, addEventFragment);
                     fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commit();
@@ -53,12 +79,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     return true;
                 case R.id.groups:
 //                  mTextMessage.setText(R.string.title_notifications);
-//                    GroupListFragment groupListFragment = new GroupListFragment();
-//                    fragmentTransaction.replace(fragContainer, groupListFragment);
-//                    fragmentTransaction.addToBackStack(null);
-//                    fragmentTransaction.commit();
-
-                    fireAddEventFragment();
+                    GroupListFragment groupListFragment = new GroupListFragment();
+                    fragmentTransaction.replace(fragContainer, groupListFragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
                     return true;
             }
 
@@ -72,15 +96,19 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EventViewModel model = ViewModelProviders.of(this).get(EventViewModel.class);
-        model.loadData(this);
+        model = ViewModelProviders.of(this).get(EventViewModel.class);
+        apiUtils = new ApiUtils(this);
+
 
         fragmentManager = getSupportFragmentManager();
+        fragContainerView = findViewById(R.id.fragContainer);
         fragContainer =  findViewById(R.id.fragContainer).getId();
+
+
+        loadPriests();
 
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
         navigation.setSelectedItemId(R.id.home);
 
 
@@ -102,8 +130,37 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     }
 
-    public void fireAddEventFragment(){
+    public void fireAddEventFragment(Date clickedDate){
+        this.clickedDate = clickedDate;
         navigation.setSelectedItemId(R.id.add_event);
+    }
+
+    public void loadPriests(){
+
+        JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                try {
+                    ulist = new ArrayList<Priest>();
+                    for(int i=0;i<response.length();i++){
+                        JSONObject priest = response.getJSONObject(i);
+                        Priest nPriest = new Priest();
+                        nPriest.setPriest(priest);
+                        System.out.println("Priest:"+nPriest.getName());
+                        ulist.add(nPriest);
+                        model.setUlist(ulist);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+        };
+        apiUtils.getPriestUsers(jhtrh);
     }
 
 }

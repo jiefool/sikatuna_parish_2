@@ -45,14 +45,12 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
     private final OnListFragmentInteractionListener mListener;
     private Context context;
     ApiUtils apiUtils;
-    EventViewModel model;
 
-    public MyEventListRecyclerViewAdapter(List<Event> items, OnListFragmentInteractionListener listener, Context context, EventViewModel model) {
+    public MyEventListRecyclerViewAdapter(List<Event> items, OnListFragmentInteractionListener listener, Context context) {
         mValues = items;
         mValuesFiltered = items;
         mListener = listener;
         this.context = context;
-        this.model = model;
     }
 
     @Override

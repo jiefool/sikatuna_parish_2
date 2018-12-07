@@ -18,10 +18,10 @@ import java.util.List;
  */
 public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupListRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<Group> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyGroupListRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MyGroupListRecyclerViewAdapter(List<Group> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -35,20 +35,9 @@ public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroup
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+        holder.groupNameView.setText(mValues.get(position).getGroupName());
+        holder.groupLeaderView.setText(mValues.get(position).getGroupLeader());
+        holder.contactNumber.setText(mValues.get(position).getGroupContactNumber());
     }
 
     @Override
@@ -58,20 +47,17 @@ public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroup
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public DummyItem mItem;
+        public final TextView groupLeaderView;
+        public final TextView groupNameView;
+        public final TextView contactNumber;
+
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.item_number);
-            mContentView = (TextView) view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            groupNameView = (TextView) view.findViewById(R.id.group_name_tv);
+            groupLeaderView = (TextView) view.findViewById(R.id.group_leader_tv);
+            contactNumber = (TextView) view.findViewById(R.id.contact_number_tv);
         }
     }
 }

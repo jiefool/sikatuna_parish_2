@@ -1,13 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list"
-    android:name="com.tanginan.www.sikatuna_parish.GroupListFragment"
-    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    app:layoutManager="LinearLayoutManager"
-    tools:context=".GroupListFragment"
-    tools:listitem="@layout/fragment_grouplist" />
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="?attr/actionBarSize">
+
+    <ProgressBar
+        android:id="@+id/loading_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"
+        />
+
+
+    <LinearLayout
+        android:id="@+id/group_list"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/group_rv"
+            android:name="com.tanginan.www.sikatuna_parish.GroupListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".GroupListFragment"
+            tools:listitem="@layout/fragment_grouplist" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center">
+
+            <Button
+                android:id="@+id/add_group_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Add New Group" />
+        </FrameLayout>
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

@@ -19,13 +19,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,13 +67,12 @@ public class AddEventFragment extends Fragment {
     ProgressBar createEventDialog;
     LinearLayout layoutContainer;
     EventViewModel model;
+    static String thisClickedDate = "";
+    Button clearBtn;
 
 
     private OnFragmentInteractionListener mListener;
 
-    public AddEventFragment() {
-        // Required empty public constructor
-    }
 
     /**
      * Use this factory method to create a new instance of
@@ -86,12 +83,10 @@ public class AddEventFragment extends Fragment {
      * @return A new instance of fragment AddEventFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static AddEventFragment newInstance(String param1, String param2) {
+    public static AddEventFragment newInstance(Date clickedDate) {
         AddEventFragment fragment = new AddEventFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        thisClickedDate = formatter.format(clickedDate);
         return fragment;
     }
 
@@ -111,7 +106,10 @@ public class AddEventFragment extends Fragment {
         priests = model.getPriestData();
 
         etName = view.findViewById(R.id.name);
+        etName.requestFocus();
         etTimeStart = view.findViewById(R.id.start_datetime);
+        etTimeStart.setText(thisClickedDate);
+
         etTimeStart.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -134,6 +132,13 @@ public class AddEventFragment extends Fragment {
 
         etAlarm = view.findViewById(R.id.alarm);
         etDetails = view.findViewById(R.id.details);
+        clearBtn = view.findViewById(R.id.clear_fields);
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearFields();
+            }
+        });
         apiUtils = new ApiUtils(getContext());
         priestSelect = view.findViewById(R.id.priestSpinner);
         priestList = new PriestList(priests);
@@ -275,7 +280,6 @@ public class AddEventFragment extends Fragment {
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     System.out.println(response);
                     showProgress(false);
-                    model.loadData(getActivity());
 
                 }
 
@@ -332,5 +336,13 @@ public class AddEventFragment extends Fragment {
             createEventDialog.setVisibility(show ? View.VISIBLE : View.GONE);
             layoutContainer.setVisibility(show ? View.GONE : View.VISIBLE);
         }
+    }
+
+    public void clearFields(){
+        etName.setText("");
+        etTimeStart.setText("");
+        etTimeEnd.setText("");
+        etDetails.setText("");
+        etAlarm.setText("0");
     }
 }

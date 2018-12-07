@@ -19,15 +19,9 @@ import cz.msebera.android.httpclient.Header;
 
 public class EventViewModel extends ViewModel {
 
-    ApiUtils apiUtils;
     ArrayList<Event> elist =  new ArrayList<Event>();
     ArrayList<Priest> ulist =  new ArrayList<Priest>();
-
-    public void loadData(Context context){
-        apiUtils = new ApiUtils(context);
-        loadEvents();
-        loadPriests();
-    }
+    ArrayList<Group> glist = new ArrayList<>();
 
     public LiveData<List<Event>> eventList;
 
@@ -49,60 +43,19 @@ public class EventViewModel extends ViewModel {
         return ulist;
     }
 
-    public void loadEvents() {
-        JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                System.out.println("EVENTS:"+response);
-                try {
-                    JSONArray events = response.getJSONArray("events");
-                    elist = new ArrayList<Event>();
-                    for(int i=0;i<events.length();i++){
-                        JSONObject event = events.getJSONObject(i);
-                        Event nEvent = new Event(event);
-                        System.out.println("Event:"+nEvent.getStatus());
-                        elist.add(nEvent);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-
-            }
-        };
-        apiUtils.getEvents(jhtrh);
+    public void setElist(ArrayList<Event> elist) {
+        this.elist = elist;
     }
 
-    public void loadPriests(){
-        JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                try {
-                    ulist = new ArrayList<Priest>();
-                    for(int i=0;i<response.length();i++){
-                        JSONObject priest = response.getJSONObject(i);
-                        Priest nPriest = new Priest();
-                        nPriest.setPriest(priest);
-                        System.out.println("Priest:"+nPriest.getName());
-                        ulist.add(nPriest);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+    public void setUlist(ArrayList<Priest> ulist) {
+        this.ulist = ulist;
+    }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
-        };
-        apiUtils.getPriestUsers(jhtrh);
+    public ArrayList<Group> getGlist() {
+        return glist;
+    }
+
+    public void setGlist(ArrayList<Group> glist) {
+        this.glist = glist;
     }
 }
