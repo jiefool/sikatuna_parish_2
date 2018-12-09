@@ -135,6 +135,36 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             }
         });
 
+        holder.deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.showProgress(true);
+                JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        ArrayList<Event> eList = new ArrayList<>();
+                        for(int i=0;i<mValuesFiltered.size();i++){
+                            if(i==position){
+                                continue;
+                            }else{
+                                eList.add(mValuesFiltered.get(i));
+                            }
+                        }
+                        mValuesFiltered = eList;
+                        notifyDataSetChanged();
+                        holder.showProgress(false);
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                        super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                    }
+                };
+                apiUtils.deleteEvent(mValuesFiltered.get(position).getId(), jhrh);
+            }
+        });
+
     }
 
     @Override
@@ -190,7 +220,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         public Button rejectBtn;
         public ProgressBar updateProgress;
         public LinearLayout cardLayout;
-        public Event mItem;
+        public Button deleteBtn;
 
         public ViewHolder(View view) {
             super(view);
@@ -207,6 +237,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             rejectBtn = view.findViewById(R.id.reject_btn);
             updateProgress = view.findViewById(R.id.update_progress);
             cardLayout = view.findViewById(R.id.card_layout);
+            deleteBtn = view.findViewById(R.id.delete_btn);
         }
 
         public void showProgress(final boolean show) {

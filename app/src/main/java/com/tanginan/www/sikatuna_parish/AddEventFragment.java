@@ -279,6 +279,7 @@ public class AddEventFragment extends Fragment {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     System.out.println(response);
+                    ((MainActivity)getActivity()).fireEventListFragment();
                     showProgress(false);
 
                 }

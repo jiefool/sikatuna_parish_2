@@ -62,10 +62,11 @@ public class CalendarFragment extends Fragment {
     CalendarView calendarView;
     ScrollView listContainer;
     RecyclerView recyclerView;
-    LinearLayout noEventTextView;
+    ScrollView noEventTextView;
     Date clickedDate = Calendar.getInstance().getTime();
     Button addNewEvent2Btn;
     Button addNewEventBtn;
+    CurrentUser currentUser;
 
 
     // TODO: Rename and change types of parameters
@@ -118,6 +119,7 @@ public class CalendarFragment extends Fragment {
         listContainer = v.findViewById(R.id.list_container);
         addNewEvent2Btn = v.findViewById(R.id.add_new_event2_btn);
         addNewEventBtn = v.findViewById(R.id.add_new_event_btn);
+        currentUser = new CurrentUser(getContext());
         loadEvents();
 
 
@@ -150,20 +152,19 @@ public class CalendarFragment extends Fragment {
         JsonHttpResponseHandler jhtrh = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                System.out.println("EVENTS:"+response);
                 try {
                     JSONArray events = response.getJSONArray("events");
                     for(int i=0;i<events.length();i++){
                         JSONObject event = events.getJSONObject(i);
                         Event nEvent = new Event(event);
-                        System.out.println("Event:"+nEvent.getStatus());
                         parishEvents.add(nEvent);
-                        model.setElist(parishEvents);
-                        loadEventsToCalendar();
                         displayEvents(Calendar.getInstance());
-                        ((MainActivity)getActivity()).setEventAlarms();
-                        showProgress(false);
+
                     }
+                    model.setElist(parishEvents);
+                    loadEventsToCalendar();
+                    showProgress(false);
+                    ((MainActivity)getActivity()).setEventAlarms(parishEvents);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (ParseException e) {
@@ -178,7 +179,7 @@ public class CalendarFragment extends Fragment {
 
             }
         };
-        apiUtils.getEvents(jhtrh);
+        apiUtils.getUserEvents(currentUser.getUserId(), jhtrh);
     }
 
     private void showProgress(final boolean show) {

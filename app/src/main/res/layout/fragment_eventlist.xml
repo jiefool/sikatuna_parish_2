@@ -163,7 +163,6 @@
         android:id="@+id/confirm_btn"
         android:text="Confirm"
         android:textColor="@android:color/white"
-        android:layout_margin="5dp"
         android:backgroundTint="@android:color/holo_green_dark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -171,7 +170,14 @@
         <Button
             android:id="@+id/reject_btn"
             android:text="Reject"
-            android:layout_margin="5dp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_orange_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/delete_btn"
+            android:text="Delete"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/holo_red_dark"
             android:layout_width="match_parent"

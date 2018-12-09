@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,6 +63,7 @@ public class SettingsFragment extends Fragment {
     LinearLayout fieldsContainer;
     ProgressBar progressBar;
     View view;
+    Button updateUserBtn;
 
     private OnFragmentInteractionListener mListener;
 
@@ -114,6 +116,14 @@ public class SettingsFragment extends Fragment {
         userPhoto = view.findViewById(R.id.user_photo);
         fieldsContainer = view.findViewById(R.id.field_container);
         progressBar = view.findViewById(R.id.loading_progress);
+        responseText = view.findViewById(R.id.response_text);
+        updateUserBtn = view.findViewById(R.id.update_user);
+        updateUserBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUser();
+            }
+        });
         getUserDetails();
 
 
@@ -180,55 +190,72 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    public void updateUser(View view) {
+    public void updateUser() {
+        Boolean valid = true;
         String nameStr = name.getText().toString();
         String usernameStr = username.getText().toString();
         String emailStr = email.getText().toString();
         String currentPasswordStr = currentPassword.getText().toString();
+
+        if (currentPasswordStr.length() == 0){
+            valid = false;
+            currentPassword.requestFocus();
+            currentPassword.setError("This field is required.");
+        }
         String newPasswordStr = newPassword.getText().toString();
+        if (newPasswordStr.length() == 0){
+            valid = false;
+            newPassword.requestFocus();
+            newPassword.setError("This field is required.");
+        }
+
         String confirmPasswordStr = confirmPassword.getText().toString();
+        if (confirmPasswordStr.length() == 0){
+            valid = false;
+            confirmPassword.requestFocus();
+            confirmPassword.setError("This field is required.");
+        }
 
-        String userId =  currentUser.getUserId();
-        RequestParams params = new RequestParams();
-        params.add("name", nameStr);
-        params.add("username", usernameStr);
-        params.add("email", emailStr);
-        params.add("current_password", currentPasswordStr);
-        params.add("password", newPasswordStr);
-        params.add("password_confirmation", confirmPasswordStr);
+        if (!confirmPasswordStr.equals(newPasswordStr)){
+            valid = false;
+            confirmPassword.requestFocus();
+            confirmPassword.setError("Does not match with new password.");
+        }
 
-        JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                System.out.println(response);
 
-                try {
-                    userIdRes = response.getString("id");
-                } catch (JSONException e) {
-                    try {
-                        responseRes = response.getString("error");
-                    } catch (JSONException e1) {
-                        e1.printStackTrace();
-                    }
+
+        if(valid){
+            showProgress(true);
+            String userId =  currentUser.getUserId();
+            RequestParams params = new RequestParams();
+            params.add("name", nameStr);
+            params.add("username", usernameStr);
+            params.add("email", emailStr);
+            params.add("current_password", currentPasswordStr);
+            params.add("password", newPasswordStr);
+            params.add("password_confirmation", confirmPasswordStr);
+
+            JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    responseText.requestFocus();
+                    responseText.setText(response.toString());
+                    showProgress(false);
+                    getUserDetails();
+
                 }
 
-                if(!userIdRes.isEmpty()){
-                    responseText.setText("Update successful.");
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    showProgress(false);
+                    getUserDetails();
+                    responseText.requestFocus();
+                    responseText.setText("Error updating details.");
                 }
+            };
 
-                if (!responseRes.isEmpty()){
-                    responseText.setText(responseRes);
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                System.out.println(errorResponse);
-                responseText.setText("Update failed.");
-            }
-        };
-
-        apiUtils.updateUser(userId, params, jhrh);
+            apiUtils.updateUser(userId, params, jhrh);
+        }
 
     }
 
@@ -271,6 +298,7 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
+                    currentUser.setDataToSharedPreferences("user_id", response.getString("id"));
                     currentUser.setDataToSharedPreferences("username", response.getString("username"));
                     currentUser.setDataToSharedPreferences("name", response.getString("name"));
                     currentUser.setDataToSharedPreferences("photo", response.getString("photo"));
@@ -285,6 +313,8 @@ public class SettingsFragment extends Fragment {
                     // show The Image in a ImageView
                     new DownloadImageTask((ImageView) view.findViewById(R.id.user_photo))
                             .execute(photoUrl);
+
+                    showProgress(false);
 
                 } catch (JSONException e) {
                     e.printStackTrace();

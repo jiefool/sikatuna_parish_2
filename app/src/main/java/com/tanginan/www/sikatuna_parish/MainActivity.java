@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -46,10 +47,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     View fragContainerView;
     BottomNavigationView navigation;
     ArrayList<Priest> ulist =  new ArrayList<Priest>();
-    ArrayList<Event> elist =  new ArrayList<Event>();
     EventViewModel model;
     ApiUtils apiUtils;
     Date clickedDate = Calendar.getInstance().getTime();
+    CurrentUser currentUser;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -104,13 +105,14 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
         model = ViewModelProviders.of(this).get(EventViewModel.class);
         apiUtils = new ApiUtils(this);
+        currentUser = new CurrentUser(this);
 
 
         fragmentManager = getSupportFragmentManager();
         fragContainerView = findViewById(R.id.fragContainer);
         fragContainer =  findViewById(R.id.fragContainer).getId();
 
-
+        getUserDetails();
         loadPriests();
 
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -169,10 +171,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         apiUtils.getPriestUsers(jhtrh);
     }
 
-    public void setEventAlarms(){
-        List<Event> elist = model.getEventData();
+    public void setEventAlarms(List<Event> elist){
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         ArrayList<PendingIntent> intentArray = new ArrayList<PendingIntent>();
+
+        System.out.println("ALARM IN:");
+        System.out.println("ALARM IN:"+elist.size());
 
         for(int i=0;i<elist.size();i++){
             if (System.currentTimeMillis() < elist.get(i).getAlarm().getTime()) {
@@ -181,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 cal.setTime(elist.get(i).getAlarm());
 
                 System.out.println("ALARM IN:");
-                System.out.println( elist.get(i).getAlarm());
+                System.out.println( elist.get(i).getAlarm().toString());
                 Intent intent = new Intent(this, AlarmReceiver.class);
                 intent.putExtra("event", elist.get(i).toString());
                 PendingIntent pi = PendingIntent.getBroadcast(this, elist.get(i).getId(), intent, elist.get(i).getId());
@@ -204,6 +208,9 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     public void fireListGroupFragment(){
         navigation.setSelectedItemId(R.id.groups);
+    }
+    public void fireEventListFragment(){
+        navigation.setSelectedItemId(R.id.events);
     }
 
     @Override
@@ -232,6 +239,30 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public  void getUserDetails(){
+        JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    currentUser.setDataToSharedPreferences("user_id", response.getString("id"));
+                    currentUser.setDataToSharedPreferences("username", response.getString("username"));
+                    currentUser.setDataToSharedPreferences("name", response.getString("name"));
+                    currentUser.setDataToSharedPreferences("photo", response.getString("photo"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+            }
+        };
+
+        apiUtils.getUserDetails(currentUser.getEmail(), jhrh);
     }
 
 }

@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -32,7 +33,7 @@ import cz.msebera.android.httpclient.Header;
  */
 public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroupListRecyclerViewAdapter.ViewHolder> {
 
-    private final List<Group> mValues;
+    private List<Group> mValues;
     private final OnListFragmentInteractionListener mListener;
     ApiUtils apiUtils;
     Context context;
@@ -61,7 +62,7 @@ public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroup
         holder.deleteGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteGroup(position);
+                holder.deleteGroup(position);
             }
         });
 
@@ -89,29 +90,37 @@ public class MyGroupListRecyclerViewAdapter extends RecyclerView.Adapter<MyGroup
             deleteGroup = (Button) view.findViewById(R.id.delete_group);
             cardLayout = view.findViewById(R.id.card_layout);
             progressBar = view.findViewById(R.id.loading_progress);
+        }
 
+        public void deleteGroup(Integer position){
+            showProgress(true);
+            JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    ArrayList<Group> gList = new ArrayList<>();
+                    for(int i=0;i<mValues.size();i++){
+                        if(i == position){
+                            continue;
+                        }else{
+                            gList.add(mValues.get(i));
+                        }
+                    }
+                    mValues = gList;
+                    notifyDataSetChanged();
+                    showProgress(false);
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    super.onFailure(statusCode, headers, throwable, errorResponse);
+
+                }
+            };
+            apiUtils.deleteGroup(mValues.get(position).getGroupId(), jhrh);
         }
     }
 
-    public void deleteGroup(Integer position){
-        showProgress(true);
-        JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                mValues.remove(position);
-                notifyDataSetChanged();
-                showProgress(false);
-            }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-
-            }
-        };
-        apiUtils.deleteGroup(mValues.get(position).getGroupId(), jhrh);
-
-    }
 
     public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow

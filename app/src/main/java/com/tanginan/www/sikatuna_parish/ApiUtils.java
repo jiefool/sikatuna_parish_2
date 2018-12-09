@@ -77,7 +77,7 @@ public class ApiUtils {
         HttpUtils.get(url, params,jhrh, accessToken);
     }
 
-    public void deleteEvent(String eventId, JsonHttpResponseHandler jhrh){
+    public void deleteEvent(Integer eventId, JsonHttpResponseHandler jhrh){
         String url = "events/"+eventId+"/destroy";
         RequestParams params = new RequestParams();
         HttpUtils.post(url, params,jhrh, accessToken);
