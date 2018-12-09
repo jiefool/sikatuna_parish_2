@@ -54,6 +54,7 @@ public class GroupListFragment extends Fragment {
     ArrayList<Group> arGroup = new ArrayList<>();
     Button addNewGroupBtn;
 
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -166,7 +167,7 @@ public class GroupListFragment extends Fragment {
                         arGroup.add(nGroup);
                         model.setGlist(arGroup);
 
-                        adapter = new MyGroupListRecyclerViewAdapter(arGroup, mListener);
+                        adapter = new MyGroupListRecyclerViewAdapter(arGroup, mListener, getContext());
                         recyclerView.setAdapter(adapter);
 
 

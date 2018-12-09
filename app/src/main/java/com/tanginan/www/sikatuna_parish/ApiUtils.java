@@ -94,7 +94,7 @@ public class ApiUtils {
         HttpUtils.post(url, params,jhrh, accessToken);
     }
 
-    public void deleteGroup(String groupId, JsonHttpResponseHandler jhrh){
+    public void deleteGroup(Integer groupId, JsonHttpResponseHandler jhrh){
         String url = "groups/"+groupId+"/delete";
         RequestParams params = new RequestParams();
         HttpUtils.post(url, params,jhrh, accessToken);
