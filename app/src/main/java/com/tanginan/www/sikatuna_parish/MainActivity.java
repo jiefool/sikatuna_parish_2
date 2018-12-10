@@ -4,7 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -22,6 +25,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -39,6 +44,8 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
+import static android.support.v4.media.session.MediaButtonReceiver.handleIntent;
+
 
 public class MainActivity extends AppCompatActivity implements EventListFragment.OnListFragmentInteractionListener, GroupListFragment.OnListFragmentInteractionListener,  AddEventFragment.OnFragmentInteractionListener {
 
@@ -51,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     ApiUtils apiUtils;
     Date clickedDate = Calendar.getInstance().getTime();
     CurrentUser currentUser;
+    MenuItem searchItem;
+    Boolean showSearch = false;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -61,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             switch (item.getItemId()) {
                 case R.id.home:
 //                    mTextMessage.setText(R.string.title_home);
-
+                    showSearch = false;
                     CalendarFragment calendarFragment = new CalendarFragment();
                     fragmentTransaction.replace(fragContainer, calendarFragment);
                     fragmentTransaction.addToBackStack(null);
@@ -70,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
                 case R.id.add_event:
 //                    mTextMessage.setText(R.string.title_home);
-
+                    showSearch = false;
                     AddEventFragment addEventFragment = AddEventFragment.newInstance(clickedDate);
                     fragmentTransaction.replace(fragContainer, addEventFragment);
                     fragmentTransaction.addToBackStack(null);
@@ -79,12 +88,14 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
                 case R.id.events:
 //                  mTextMessage.setText(R.string.title_dashboard);
+                    showSearch = true;
                     EventListFragment eventListFragment = new EventListFragment();
                     fragmentTransaction.replace(fragContainer, eventListFragment);
                     fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commit();
                     return true;
                 case R.id.groups:
+                    showSearch = false;
 //                  mTextMessage.setText(R.string.title_notifications);
                     GroupListFragment groupListFragment = new GroupListFragment();
                     fragmentTransaction.replace(fragContainer, groupListFragment);
@@ -119,7 +130,11 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.home);
 
-
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            doMySearch(query);
+        }
 
     }
 
@@ -175,8 +190,6 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
         ArrayList<PendingIntent> intentArray = new ArrayList<PendingIntent>();
 
-        System.out.println("ALARM IN:");
-        System.out.println("ALARM IN:"+elist.size());
 
         for(int i=0;i<elist.size();i++){
             if (System.currentTimeMillis() < elist.get(i).getAlarm().getTime()) {
@@ -184,10 +197,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(elist.get(i).getAlarm());
 
-                System.out.println("ALARM IN:");
-                System.out.println( elist.get(i).getAlarm().toString());
                 Intent intent = new Intent(this, AlarmReceiver.class);
-                intent.putExtra("event", elist.get(i).toString());
+                intent.putExtra("event", elist.get(i).getJSONString());
                 PendingIntent pi = PendingIntent.getBroadcast(this, elist.get(i).getId(), intent, elist.get(i).getId());
                 am.cancel(pi);
                 am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
@@ -217,6 +228,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.home_menu, menu);
+
+      
+
+
         return true;
     }
 
@@ -263,6 +278,11 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         };
 
         apiUtils.getUserDetails(currentUser.getEmail(), jhrh);
+    }
+
+
+    public void doMySearch(String query){
+        System.out.println("search query: "+query);
     }
 
 }

@@ -16,8 +16,10 @@ public class Event {
     private Date alarm;
     private String details;
     private String status;
+    private String jsonStr;
 
     public Event(JSONObject event) throws JSONException, ParseException {
+        this.jsonStr = event.toString();
         this.setId(event.getInt("id"));
         this.setName(event.getString("name"));
         this.setUserId(event.getInt("user_id"));
@@ -121,6 +123,10 @@ public class Event {
         SimpleDateFormat formatter = new SimpleDateFormat("d");
         String dateMonth = formatter.format(timeStart);
         return dateMonth;
+    }
+
+    public String getJSONString(){
+        return jsonStr;
     }
 
 

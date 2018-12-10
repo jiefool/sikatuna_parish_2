@@ -2,6 +2,7 @@ package com.tanginan.www.sikatuna_parish;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.SearchManager;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Build;
@@ -10,12 +11,21 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.tanginan.www.sikatuna_parish.dummy.DummyContent;
@@ -52,6 +62,9 @@ public class EventListFragment extends Fragment {
     ProgressBar loadProgress;
     LinearLayout eventListContainer;
     ApiUtils apiUtils;
+    private SearchView searchView = null;
+    private SearchView.OnQueryTextListener queryTextListener;
+
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,6 +86,7 @@ public class EventListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
@@ -83,6 +97,7 @@ public class EventListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_eventlist_list, container, false);
+        setHasOptionsMenu(true);
 
         model = ViewModelProviders.of((MainActivity)getActivity()).get(EventViewModel.class);
         loadProgress = view.findViewById(R.id.loading_progress);
@@ -127,9 +142,6 @@ public class EventListFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnListFragmentInteractionListener) {
             mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
         }
     }
 
@@ -154,6 +166,8 @@ public class EventListFragment extends Fragment {
         void onListFragmentInteraction(Event item);
 
     }
+
+
 
     private class GenericOnClickListener implements View.OnClickListener {
         View view;
@@ -252,5 +266,60 @@ public class EventListFragment extends Fragment {
             eventListContainer.setVisibility(show ? View.VISIBLE : View.GONE);
             loadProgress.setVisibility(show ? View.GONE : View.VISIBLE);
         }
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+
+            queryTextListener = new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    Log.i("onQueryTextChange", newText);
+                    searchEventList(newText);
+                    return true;
+                }
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    Log.i("onQueryTextSubmit", query);
+                    searchEventList(query);
+                    return true;
+                }
+            };
+            searchView.setOnQueryTextListener(queryTextListener);
+        }
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                // Not implemented here
+                return false;
+            default:
+                break;
+        }
+        searchView.setOnQueryTextListener(queryTextListener);
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void searchEventList(String newText) {
+        ArrayList<Event> nEList = new ArrayList<>();
+        for (int i = 0; i < elist.size(); i++) {
+            if (elist.get(i).getName().contains(newText))
+                nEList.add(elist.get(i));
+        }
+        adapter = new MyEventListRecyclerViewAdapter(nEList, mListener, getContext());
+        recyclerView.setAdapter(adapter);
     }
 }
