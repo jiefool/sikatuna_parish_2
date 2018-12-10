@@ -111,7 +111,6 @@ public class EventListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
 
-
         RadioButton confirmRb = view.findViewById(R.id.confirm_rb);
         RadioButton pendingRb = view.findViewById(R.id.pending_rb);
         RadioButton rejectedRb = view.findViewById(R.id.rejected_rb);

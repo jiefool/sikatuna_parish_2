@@ -49,4 +49,6 @@
     <string name="alarm">Alarm</string>
     <string name="search_title">Find Event</string>
     <string name="search_hint">Type Event Title</string>
+    <string name="filename">Filename</string>
+    <string name="save_to_docs">Save</string>
 </resources>

@@ -2,6 +2,8 @@ package com.tanginan.www.sikatuna_parish;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -45,6 +47,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
     private final OnListFragmentInteractionListener mListener;
     private Context context;
     ApiUtils apiUtils;
+    DialogFragment dialogFragment;
 
     public MyEventListRecyclerViewAdapter(List<Event> items, OnListFragmentInteractionListener listener, Context context) {
         mValues = items;
@@ -165,6 +168,23 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             }
         });
 
+        holder.saveEventToDoc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                android.app.FragmentTransaction ft = ((Activity)context).getFragmentManager().beginTransaction();
+                android.app.Fragment prev = ((Activity) context).getFragmentManager().findFragmentByTag("dialog");
+                if (prev != null) {
+                    ft.remove(prev);
+                }
+                ft.addToBackStack(null);
+
+                    dialogFragment = SaveEventFragment.newInstance(mValuesFiltered.get(position));
+
+                dialogFragment.show(ft, "dialog");
+            }
+        });
+
     }
 
     @Override
@@ -221,6 +241,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         public ProgressBar updateProgress;
         public LinearLayout cardLayout;
         public Button deleteBtn;
+        public Button saveEventToDoc;
 
         public ViewHolder(View view) {
             super(view);
@@ -238,6 +259,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             updateProgress = view.findViewById(R.id.update_progress);
             cardLayout = view.findViewById(R.id.card_layout);
             deleteBtn = view.findViewById(R.id.delete_btn);
+            saveEventToDoc = view.findViewById(R.id.save_btn);
         }
 
         public void showProgress(final boolean show) {

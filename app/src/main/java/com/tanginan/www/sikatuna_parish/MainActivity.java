@@ -12,11 +12,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,6 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,7 +47,9 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
+import static android.os.Environment.getExternalStoragePublicDirectory;
 import static android.support.v4.media.session.MediaButtonReceiver.handleIntent;
+import static com.loopj.android.http.AsyncHttpClient.LOG_TAG;
 
 
 public class MainActivity extends AppCompatActivity implements EventListFragment.OnListFragmentInteractionListener, GroupListFragment.OnListFragmentInteractionListener,  AddEventFragment.OnFragmentInteractionListener {
@@ -285,4 +290,28 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         System.out.println("search query: "+query);
     }
 
+    public Boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    public File getPublicDocumentStorageDir(String dirName) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOCUMENTS), dirName);
+        if (!file.mkdirs()) {
+            Log.e(LOG_TAG, "Directory not created");
+        }
+        return file;
+    }
+
+    public void scanMedia(String path, Context context) {
+        File file = new File(path);
+        Uri uri = Uri.fromFile(file);
+        Intent scanFileIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri);
+        context.sendBroadcast(scanFileIntent);
+    }
 }
