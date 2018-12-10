@@ -97,6 +97,8 @@
 
             <Button
                 android:id="@+id/delete_group"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@android:color/holo_red_dark"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Delete" />

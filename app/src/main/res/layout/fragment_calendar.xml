@@ -56,7 +56,7 @@
 
                 <Button
                     android:textColor="@android:color/white"
-                    android:backgroundTint="@android:color/holo_green_dark"
+                    android:backgroundTint="@color/colorPrimary"
                     android:id="@+id/add_new_event2_btn"
                     android:text="Add New Event"
                     android:layout_width="match_parent"
@@ -87,8 +87,8 @@
                     android:layout_height="match_parent" />
 
                 <Button
-                    android:textColor="@android:color/white"
                     android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@android:color/white"
                     android:id="@+id/add_new_event_btn"
                     android:text="Add New Event"
                     android:layout_width="match_parent"
