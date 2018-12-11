@@ -89,15 +89,22 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             holder.status.setTextColor(Color.GREEN);
             holder.confirmBtn.setVisibility(View.GONE);
             holder.rejectBtn.setVisibility(View.GONE);
+            holder.editBtn.setVisibility(View.GONE);
         }else if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("rejected")) {
             holder.status.setTextColor(Color.RED);
             holder.confirmBtn.setVisibility(View.GONE);
             holder.rejectBtn.setVisibility(View.GONE);
-        }else if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("pending") && currentUser.getType().equals("priest")) {
-            holder.confirmBtn.setVisibility(View.VISIBLE);
-            holder.rejectBtn.setVisibility(View.VISIBLE);
+            holder.editBtn.setVisibility(View.GONE);
+        }else if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("pending")){
+            holder.editBtn.setVisibility(View.VISIBLE);
         }else{
             holder.status.setTextColor(Color.RED);
+        }
+
+        if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("pending") && currentUser.getType().equals("priest")) {
+            holder.confirmBtn.setVisibility(View.VISIBLE);
+            holder.rejectBtn.setVisibility(View.VISIBLE);
+            holder.editBtn.setVisibility(View.GONE);
         }
 
         holder.confirmBtn.setOnClickListener(new View.OnClickListener() {
@@ -132,6 +139,16 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         holder.rejectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                android.app.FragmentTransaction ft = ((Activity)context).getFragmentManager().beginTransaction();
+                android.app.Fragment prev = ((Activity) context).getFragmentManager().findFragmentByTag("dialog");
+                if (prev != null) {
+                    ft.remove(prev);
+                }
+                ft.addToBackStack(null);
+
+                dialogFragment = RejectEventFragment.newInstance(mValuesFiltered.get(position));
+                dialogFragment.show(ft, "dialog");
+
                 holder.showProgress(true);
                 JsonHttpResponseHandler jhrh = new JsonHttpResponseHandler() {
                     @Override
@@ -154,8 +171,12 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
 
                     }
                 };
+
+
                 apiUtils.eventStatusUpdate(mValuesFiltered.get(position).getId(), "Rejected", jhrh);
             }
+
+
         });
 
         holder.deleteBtn.setOnClickListener(new View.OnClickListener() {

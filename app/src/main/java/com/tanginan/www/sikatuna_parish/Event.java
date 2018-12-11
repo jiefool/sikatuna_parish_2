@@ -16,10 +16,10 @@ public class Event {
     private Date alarm;
     private String details;
     private String status;
-    private String jsonStr;
+    private JSONObject jsonObject;
 
     public Event(JSONObject event) throws JSONException, ParseException {
-        this.jsonStr = event.toString();
+        this.jsonObject = event;
         this.setId(event.getInt("id"));
         this.setName(event.getString("name"));
         this.setUserId(event.getInt("user_id"));
@@ -134,8 +134,8 @@ public class Event {
         return eventAlarm.toString();
     }
 
-    public String getJSONString(){
-        return jsonStr;
+    public JSONObject getJSONObject(){
+        return jsonObject;
     }
 
 

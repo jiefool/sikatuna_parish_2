@@ -127,7 +127,7 @@ public class CalendarFragment extends Fragment {
         loadEvents();
 
 
-        
+
         return v;
     }
 

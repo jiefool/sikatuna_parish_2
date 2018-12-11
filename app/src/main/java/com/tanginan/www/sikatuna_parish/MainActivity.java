@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 cal.setTime(elist.get(i).getAlarm());
 
                 Intent intent = new Intent(this, AlarmReceiver.class);
-                intent.putExtra("event", elist.get(i).getJSONString());
+                intent.putExtra("event", elist.get(i).getJSONObject().toString());
                 PendingIntent pi = PendingIntent.getBroadcast(this, elist.get(i).getId(), intent, elist.get(i).getId());
                 am.cancel(pi);
                 am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);

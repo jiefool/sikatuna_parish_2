@@ -280,7 +280,7 @@ public class AddEventFragment extends Fragment {
 
         String alarm = etAlarm.getText().toString();
 
-        String details = etAlarm.getText().toString();
+        String details = etDetails.getText().toString();
 
 
 
