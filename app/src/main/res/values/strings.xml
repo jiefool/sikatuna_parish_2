@@ -51,4 +51,5 @@
     <string name="search_hint">Type Event Title</string>
     <string name="filename">Filename</string>
     <string name="save_to_docs">Save</string>
+    <string name="update_event">Update Event</string>
 </resources>

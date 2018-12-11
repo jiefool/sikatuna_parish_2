@@ -66,7 +66,7 @@ public class ApiUtils {
         HttpUtils.post(url, params,jhrh, accessToken);
     }
 
-    public void updateEvent(String eventId, RequestParams params, JsonHttpResponseHandler jhrh){
+    public void updateEvent(Integer eventId, RequestParams params, JsonHttpResponseHandler jhrh){
         String url = "events/"+eventId+"/update";
         HttpUtils.post(url, params,jhrh, accessToken);
     }

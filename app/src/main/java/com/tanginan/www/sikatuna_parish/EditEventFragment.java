@@ -31,7 +31,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -41,16 +40,14 @@ import cz.msebera.android.httpclient.Header;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AddEventFragment.OnFragmentInteractionListener} interface
+ * {@link EditEventFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link AddEventFragment#newInstance} factory method to
+ * Use the {@link EditEventFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddEventFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class EditEventFragment extends Fragment {
+
+    private static Event thisEvent;
     ApiUtils apiUtils;
 
     EditText etName;
@@ -63,12 +60,10 @@ public class AddEventFragment extends Fragment {
     ArrayAdapter adapter;
     PriestList priestList;
     Long time;
-    Button createEvent;
+    Button updateEvent;
     ProgressBar createEventDialog;
     LinearLayout layoutContainer;
     EventViewModel model;
-    static String thisClickedDate = "";
-    Button clearBtn;
     CurrentUser currentUser;
     List<Event> eventList;
 
@@ -76,36 +71,39 @@ public class AddEventFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
 
-
-    public static AddEventFragment newInstance(Date clickedDate) {
-        AddEventFragment fragment = new AddEventFragment();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        thisClickedDate = formatter.format(clickedDate);
+    public static EditEventFragment newInstance(Event event) {
+        EditEventFragment fragment = new EditEventFragment();
+        Bundle args = new Bundle();
+        thisEvent = event;
+        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentUser = new CurrentUser(getActivity());
+        if (getArguments() != null) {
+
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-        View view = inflater.inflate(R.layout.fragment_add_event, container, false);
-
+        View view = inflater.inflate(R.layout.fragment_edit_event, container, false);
         model = ViewModelProviders.of(getActivity()).get(EventViewModel.class);
         eventList = model.getEventData();
         priests = model.getPriestData();
 
-        etName = view.findViewById(R.id.name);
-        etName.requestFocus();
-        etTimeStart = view.findViewById(R.id.start_datetime);
-        etTimeStart.setText(thisClickedDate);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        etName = view.findViewById(R.id.name);
+        etName.setText(thisEvent.getName());
+        etName.requestFocus();
+
+        etTimeStart = view.findViewById(R.id.start_datetime);
+        etTimeStart.setText(formatter.format(thisEvent.getTimeStartDate()));
         etTimeStart.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -117,6 +115,7 @@ public class AddEventFragment extends Fragment {
 
 
         etTimeEnd = view.findViewById(R.id.end_datetime);
+        etTimeEnd.setText(formatter.format(thisEvent.getTimeEndDate()));
         etTimeEnd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -127,24 +126,24 @@ public class AddEventFragment extends Fragment {
         });
 
         etAlarm = view.findViewById(R.id.alarm);
+        etAlarm.setText(thisEvent.getAlarmString());
+
+
         etDetails = view.findViewById(R.id.details);
-        clearBtn = view.findViewById(R.id.clear_fields);
-        clearBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearFields();
-            }
-        });
+        etDetails.setText(thisEvent.getDetails());
+
         apiUtils = new ApiUtils(getContext());
-        priestSelect = view.findViewById(R.id.priestSpinner);
         priestList = new PriestList(priests);
 
         ArrayList<String> priestNames = priestList.getPriestNames();
+        priestSelect = view.findViewById(R.id.priestSpinner);
         adapter = new ArrayAdapter<>(getContext(),android.R.layout.simple_spinner_dropdown_item, priestNames);
         priestSelect.setAdapter(adapter);
+        int spinnerPosition = adapter.getPosition(priestList.getPriestNameByUserId(thisEvent.getUserId()));
+        priestSelect.setSelection(spinnerPosition);
 
-        createEvent = view.findViewById(R.id.create_event_btn);
-        createEvent.setOnClickListener(new View.OnClickListener() {
+        updateEvent = view.findViewById(R.id.update_event_btn);
+        updateEvent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
@@ -159,8 +158,6 @@ public class AddEventFragment extends Fragment {
 
         createEventDialog = view.findViewById(R.id.create_event_progress);
         layoutContainer = view.findViewById(R.id.create_event_container);
-
-
         return view;
     }
 
@@ -176,9 +173,6 @@ public class AddEventFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
         }
     }
 
@@ -233,6 +227,7 @@ public class AddEventFragment extends Fragment {
 
     }
 
+
     public void validateAndCreateEvent() throws JSONException, ParseException {
         String eventName = etName.getText().toString();
         Boolean valid = true;
@@ -248,19 +243,6 @@ public class AddEventFragment extends Fragment {
             etTimeStart.requestFocus();
             etTimeStart.setError("This field is required.");
         }
-
-        for(int i=0;i<eventList.size();i++){
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date xTimeStart = eventList.get(i).getTimeStartDate();
-            Date yTimeStart = formatter.parse(timeStart);
-            SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH");
-            if(formatter2.format(xTimeStart).equals(formatter2.format(yTimeStart)) ){
-                valid = false;
-                etTimeStart.requestFocus();
-                etTimeStart.setError("Event is in conflict with "+eventList.get(i).getName());
-            }
-        }
-
 
 
         String timeEnd = etTimeEnd.getText().toString();
@@ -310,20 +292,12 @@ public class AddEventFragment extends Fragment {
             params.add("details", details);
             params.add("user_id", priest.getId().toString());
             params.add("is_confirmed", "false");
+            params.add("status", thisEvent.getStatus());
 
-            if(currentUser.getType().equals("priest")){
-                params.add("status", "Confirmed");
-            }else{
-                params.add("status", "Pending");
-            }
-
-            apiUtils.createEvent(params, jhrh);
+            apiUtils.updateEvent(thisEvent.getId(), params, jhrh);
 
         }
     }
-
-
-
 
     public void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -356,14 +330,4 @@ public class AddEventFragment extends Fragment {
             layoutContainer.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-
-    public void clearFields(){
-        etName.setText("");
-        etTimeStart.setText("");
-        etTimeEnd.setText("");
-        etDetails.setText("");
-        etAlarm.setText("0");
-    }
-
-
 }

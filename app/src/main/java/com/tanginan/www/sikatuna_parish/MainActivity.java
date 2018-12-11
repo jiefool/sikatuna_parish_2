@@ -222,12 +222,21 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         fragmentTransaction.commit();
     }
 
+    public void editEvent(Event event){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        EditEventFragment editFragmentFragment = EditEventFragment.newInstance(event);
+        fragmentTransaction.replace(fragContainer, editFragmentFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
     public void fireListGroupFragment(){
         navigation.setSelectedItemId(R.id.groups);
     }
     public void fireEventListFragment(){
         navigation.setSelectedItemId(R.id.events);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -270,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     currentUser.setDataToSharedPreferences("username", response.getString("username"));
                     currentUser.setDataToSharedPreferences("name", response.getString("name"));
                     currentUser.setDataToSharedPreferences("photo", response.getString("photo"));
+                    currentUser.setDataToSharedPreferences("type", response.getString("type"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

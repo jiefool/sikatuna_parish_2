@@ -29,4 +29,14 @@ public class PriestList {
         }
         return priestNames;
     }
+
+    public String getPriestNameByUserId(Integer userId){
+        Priest p = new Priest();
+        for(int i=0;i<list.size();i++){
+            if (list.get(i).getId() == userId){
+                 p = list.get(i);
+            }
+        }
+        return p.getName();
+    }
 }

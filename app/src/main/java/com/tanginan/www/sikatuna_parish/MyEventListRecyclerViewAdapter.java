@@ -48,6 +48,8 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
     private Context context;
     ApiUtils apiUtils;
     DialogFragment dialogFragment;
+    CurrentUser currentUser;
+    Boolean isFiltered = false;
 
     public MyEventListRecyclerViewAdapter(List<Event> items, OnListFragmentInteractionListener listener, Context context) {
         mValues = items;
@@ -61,6 +63,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_eventlist, parent, false);
         apiUtils = new ApiUtils(context);
+        currentUser = new CurrentUser(context);
         return new ViewHolder(view);
     }
 
@@ -74,8 +77,25 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         holder.details.setText(mValuesFiltered.get(position).getDetails());
         holder.status.setText(mValuesFiltered.get(position).getStatus());
 
+        if (currentUser.getType().equals("secretary")){
+            holder.rejectBtn.setVisibility(View.GONE);
+            holder.confirmBtn.setVisibility(View.GONE);
+            holder.deleteBtn.setVisibility(View.GONE);
+        }else{
+            holder.editBtn.setVisibility(View.GONE);
+        }
+
         if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("confirmed")){
             holder.status.setTextColor(Color.GREEN);
+            holder.confirmBtn.setVisibility(View.GONE);
+            holder.rejectBtn.setVisibility(View.GONE);
+        }else if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("rejected")) {
+            holder.status.setTextColor(Color.RED);
+            holder.confirmBtn.setVisibility(View.GONE);
+            holder.rejectBtn.setVisibility(View.GONE);
+        }else if(mValuesFiltered.get(position).getStatus().toLowerCase().equals("pending") && currentUser.getType().equals("priest")) {
+            holder.confirmBtn.setVisibility(View.VISIBLE);
+            holder.rejectBtn.setVisibility(View.VISIBLE);
         }else{
             holder.status.setTextColor(Color.RED);
         }
@@ -168,6 +188,14 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             }
         });
 
+
+        holder.editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)context).editEvent(mValuesFiltered.get(position));
+            }
+        });
+
         holder.saveEventToDoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -184,6 +212,8 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
                 dialogFragment.show(ft, "dialog");
             }
         });
+
+
 
     }
 
@@ -242,6 +272,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
         public LinearLayout cardLayout;
         public Button deleteBtn;
         public Button saveEventToDoc;
+        public Button editBtn;
 
         public ViewHolder(View view) {
             super(view);
@@ -260,6 +291,7 @@ public class MyEventListRecyclerViewAdapter extends RecyclerView.Adapter<MyEvent
             cardLayout = view.findViewById(R.id.card_layout);
             deleteBtn = view.findViewById(R.id.delete_btn);
             saveEventToDoc = view.findViewById(R.id.save_btn);
+            editBtn = view.findViewById(R.id.edit_btn);
         }
 
         public void showProgress(final boolean show) {

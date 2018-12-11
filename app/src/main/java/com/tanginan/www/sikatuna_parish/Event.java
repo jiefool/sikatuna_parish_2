@@ -80,6 +80,10 @@ public class Event {
         this.timeStart = timeStart;
     }
 
+    public Date getTimeEndDate() {
+        return timeEnd;
+    }
+
     public String getTimeEnd() {
         SimpleDateFormat formatter = new SimpleDateFormat("hh:mm aaa");
         return formatter.format(timeEnd);
@@ -123,6 +127,11 @@ public class Event {
         SimpleDateFormat formatter = new SimpleDateFormat("d");
         String dateMonth = formatter.format(timeStart);
         return dateMonth;
+    }
+
+    public String getAlarmString(){
+        Long eventAlarm = (timeStart.getTime() - alarm.getTime())/1000;
+        return eventAlarm.toString();
     }
 
     public String getJSONString(){
