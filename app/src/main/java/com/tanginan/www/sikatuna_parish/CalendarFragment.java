@@ -17,7 +17,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -67,6 +69,8 @@ public class CalendarFragment extends Fragment {
     Button addNewEvent2Btn;
     Button addNewEventBtn;
     CurrentUser currentUser;
+    Integer clickCount=0;
+    EventDay clickedEventDay;
 
 
     // TODO: Rename and change types of parameters
@@ -117,26 +121,13 @@ public class CalendarFragment extends Fragment {
         calendarView = v.findViewById(R.id.calendarView);
         noEventTextView = v.findViewById(R.id.no_event_tv);
         listContainer = v.findViewById(R.id.list_container);
-        addNewEvent2Btn = v.findViewById(R.id.add_new_event2_btn);
-        addNewEventBtn = v.findViewById(R.id.add_new_event_btn);
+//        addNewEvent2Btn = v.findViewById(R.id.add_new_event2_btn);
+//        addNewEventBtn = v.findViewById(R.id.add_new_event_btn);
         currentUser = new CurrentUser(getContext());
         loadEvents();
 
 
-
-        addNewEventBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fireAddEvent();
-            }
-        });
-
-        addNewEvent2Btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fireAddEvent();
-            }
-        });
+        
         return v;
     }
 
@@ -228,15 +219,44 @@ public class CalendarFragment extends Fragment {
         calendarView.setOnDayClickListener(new OnDayClickListener() {
             @Override
             public void onDayClick(EventDay eventDay) {
-                Date currentDate = Calendar.getInstance().getTime();
-                clickedDate = eventDay.getCalendar().getTime();
-                if(clickedDate.getTime() < currentDate.getTime()){
-                    clickedDate = currentDate;
+
+                if(clickedEventDay==null){
+                    clickedEventDay = eventDay;
                 }
-                displayEvents(eventDay.getCalendar());
+
+                System.out.println("click count:"+clickCount);
+                System.out.println("event day:"+eventDay.getCalendar().getTime().getTime());
+                System.out.println("click event day:"+clickedEventDay.getCalendar().getTime().getTime());
+                System.out.println(clickedEventDay.getCalendar().getTime().getTime() == eventDay.getCalendar().getTime().getTime());
+
+                if(clickedEventDay.getCalendar().getTime().getTime() == eventDay.getCalendar().getTime().getTime()){
+                    clickCount++;
+                    clickedEventDay = eventDay;
+                }else{
+                    clickCount=0;
+                }
+
+                if(clickCount < 2) {
+
+                    Date currentDate = Calendar.getInstance().getTime();
+                    clickedDate = eventDay.getCalendar().getTime();
+                    if (clickedDate.getTime() < currentDate.getTime()) {
+                        clickedDate = currentDate;
+                    }
+                    displayEvents(eventDay.getCalendar());
+                }else{
+                    fireAddEvent();
+                    clickedEventDay = null;
+                    clickCount=0;
+                }
+                clickedEventDay = eventDay;
             }
 
         });
+
+
+
+
 
         Calendar min = Calendar.getInstance();
         min.add(Calendar.DATE, -1);

@@ -53,14 +53,6 @@
                     tools:listitem="@layout/minimal_event_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-
-                <Button
-                    android:textColor="@android:color/white"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:id="@+id/add_new_event2_btn"
-                    android:text="Add New Event"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
             </LinearLayout>
 
         </ScrollView>
@@ -84,14 +76,6 @@
                     android:text="No events."
                     android:gravity="center"
                     android:textAlignment="center"
-                    android:layout_height="match_parent" />
-
-                <Button
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@android:color/white"
-                    android:id="@+id/add_new_event_btn"
-                    android:text="Add New Event"
-                    android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </LinearLayout>
         </ScrollView>
